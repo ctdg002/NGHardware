@@ -60,11 +60,27 @@ vkInstance
       + 其他：CB完成析构，CB pending state视为未完成，所有线程idle时可析构其他obj
    + vkPhysicalDevice不可析构
 
-
-##### Application Binary Interface
-
 ##### API Syntax
+###### Application Binary Interface 跨平台能力
+vk_platform.h as Shared Library
+implementation: Application Binary Interface via c
++ 数据结构：size, align, layout
++ 函数calling convention：
+   + VKAPI_ATTR/VKAPI_CALL 返参
+   + VKAPI_PTR * 指针函数返参
++ Symbol&Naming
+   + ==由vk开头的符号是ABI保留关键字，app不可使用==
 
++ 【？】获取更高版本feature方式
+   + vkGetInstanceProcAddr/vkGetDeviceProcAddr
+
+###### Command Syntax & Duration
+基本数据结构：c99,stdint.h
+uint32_t VkBool32 -- VK_TRUE,VK_FALSE
+uint64_t VkDeviceSize -- 内存大小&offset
+uint64_t VkDeviceAddress -- 指针大小[buffer address value?]  
+构造函数：
+vkCreate(VkCreateInfo, pAllocator)
 ##### Queues
 
 ##### Pipeline Configuration
