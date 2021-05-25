@@ -80,8 +80,13 @@ uint32_t VkBool32 -- VK_TRUE,VK_FALSE
 uint64_t VkDeviceSize -- 内存大小&offset
 uint64_t VkDeviceAddress -- 指针大小[buffer address value?]  
 构造函数：
-vkCreate(VkCreateInfo, pAllocator)
+vkCreate(VkCreateInfo, pAllocator)/vkDestroy
+vkAllocate(vkAllocateInfo)/vkFree,池化obj沿用Pool的allocator
+RetrieveResult：vkGet/vkEnumerate
 ##### Queues
+###### Threading Behavior
+默认多线程
+externally synchronized：一些vkObject需要线程安全的Update-> 为所有相关CB设置内部memory barrier
 
 ##### Pipeline Configuration
 
