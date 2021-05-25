@@ -7,6 +7,10 @@ endian与硬件相同
 
 
 ##### Architecture
++ Vulkan Layered API
+   + core Vulkan Layer
+   + Debug Layer
+   + Validation Layer：assert API调用
 
 ##### Execution Model（硬件多线程）
 ###### GPU多线程 -- devices进程 -- queue families线程池队列 -- queues线程
@@ -85,13 +89,89 @@ vkAllocate(vkAllocateInfo)/vkFree,池化obj沿用Pool的allocator
 RetrieveResult：vkGet/vkEnumerate
 ##### Queues
 ###### Threading Behavior
-默认多线程
-externally synchronized：一些vkObject需要线程安全的Update-> 为所有相关CB设置内部memory barrier
+默认多线程，传统mutex需要通过pthread library等第三方库构建
+被定义为externally synchronized的vkObject：需要线程安全的SimpleStoreUpdate-> app为所有相关CB设置内部memory barrier，确保CB不同时执行
+   + 对线程的操作：Queue，Fence，Semaphore
+   + 事件触发：Event
+   + 特殊资源：CB本身，swapchain
+   + 将被Bind/Map的资源：Memory/Buffer
+   + 将被CBDestroy的资源：Sampler，ShaderModule，Pipeline，CBPool, DescriptorPool，Device
+暂时移交给vkCmdBuffer的application-owned memory(成为non-const parameter)：直到deferred CB完成
+含有externally synchronized的vkObject的数组：每个element分别保证线程安全
+   + semaphore
+   + buffer/image/discriptor/surface
+   + swapchain
+implicit external synchronized的vkObject：不直接作为parameter传入，但是会受到对特殊parameter执行相关CB操作的影响
+   + 对vkDevice析构时，影响vkQueue
+   + 分配CB时，影响CBPool
+immutable(其他所有parameter)：不需外部sync，不可destroy，可能内部sync
 
-##### Pipeline Configuration
 
-##### Numeric Representation
+##### Pipeline Configuration & Numeric Representation
+###### Error
+可能程序终止，不会影响OS，遵循OS约定（进程内存不越界，初始值，use-after-free不引起其他进程内存泄漏）
 
+###### Valid Usage Conditions @ Validation Layer
+仅编译时可知，函数调用时对传参类型检测，所有State提交完成时检测DrawState
+###### Implicit Valid Usage
++ Object Handle：成功创建，未释放，成员与passBy合法
+   + VK_NULL_HANDLE/NULL可以被传入vkDestroy/vkFree
++ pointer：类型安全、align合法的内存
++ string：char[]，以NULL结尾
++ Enum：enumerant有定义，非_MAX_ENUM(c 32b-Enum标志)，非为扩展预留的reserved value
+   + 为extension使用switch的default
++ Flags：
+   + uint32_t == vkFlags 
+   + "enumType": Vk*Flags
+   + "enumerant": Vk*FlagBits，0x80000000
+   + ==会存在未定义的bit flag位==
+   + ==仅30~0bit合法==
++ vk内置Structure：
+   + VkStructureType sType成员，表示Structure为XxxInfo，与结构名对应
+   + void *pNext成员，指向下一个ExtendingStructure/NULL    
+      + Structure Pointer Chain：不重复，平台支持
+   + 基本结构体：
+       + VkBaseInStructure迭代cpu发送到gpu信息
+       + VkBaseOutStructure迭代gpu返回cpu信息
+   + 有nested结构体
++ Extension：
+   + Instance Level feature
+      + 在vkEnumerateInstanceExtensionProperties中
+      + 被vkInstanceCreateInfo支持
+   + Physical-device-level需要被[ExtendingPhysicalDeviceCoreFunctionality](https://www.khronos.org/registry/vulkan/specs/1.2-khr-extensions/html/vkspec.html#initialization-phys-dev-extensions)支持
+   + Device Functionality
+      + vkEnumerateDeviceExtensionProperties
+      + VkDeviceCreateInfo
++ Newer Core Version：
+   + Instance Level
+      + vkEnumerateInstanceVersion
+      + VkApplicationInfo::apiVersion
+   + (Physical) Device Level
+      + VkPhysicalDeviceProperties::apiVersion
+      + VkApplicationInfo::apiVersion
+
+###### Return Code 返回码
++ VkResult-Success Code
+   + VK_NOT_READY：fence/query未完成
+   + VK_THREAD_DONE_KHR：deferred operation未完成，但没有剩余线程工作
+   + VK_SUBOPTIMAL_KHR：swapchain不再符合surface描述，但依然可以工作
+   + VK_INCOMPLETE：返参数组还不足够
++ VkResult-Error Code
+   + VK_ERROR_*
+   + VK_ERROR_INCOMPATIBLE_DISPLAY_KHR [?]backbuffer不同
+   + VK_ERROR_INVALID_OPAQUE_CAPTURE_ADDRESS [?]Buffer/ShaderGroup内存不可达
+   + VK_ERROR_UNKNOWN：application/implementation出错 -> 使用最新Validation Layer验证app
++ Errror性质：
+   + RuntimeError时，所有output parameter UB
+   + VK_ERROR_OUT_OF_*_MEMORY不会导致此前的Object UB
+   + 一些性能关键的CB可能延迟error report
+
+###### Numeric Representation & Computation
+shader的range & precision 见[SPIR-V](https://www.khronos.org/registry/vulkan/specs/1.2-khr-extensions/html/vkspec.html#spirvenv-precision-operation)
+
+非shader的range & precision
++ 浮点数
+   + magnitude >= $2^{32}$
 
 ##### State and State Query
 
@@ -100,3 +180,4 @@ externally synchronized：一些vkObject需要线程安全的Update-> 为所有�
 
 
 ##### Shaders
+

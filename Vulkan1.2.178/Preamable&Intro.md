@@ -20,3 +20,7 @@ can/cannot == 硬件是否支持
 [DataFormat](https://www.khronos.org/registry/DataFormat/specs/1.3/dataformat.1.3.html)
 [Vulkan文档扩展](https://www.khronos.org/registry/vulkan/specs/1.2/styleguide.html)
 [IEEE浮点数]
+
+##### References
+API Reference:
+https://www.khronos.org/registry/vulkan/specs/1.2-khr-extensions/html/vkspec.html#${ApiName}
