@@ -149,8 +149,7 @@ immutable(其他所有parameter)：不需外部sync，不可destroy，可能内�
    + (Physical) Device Level
       + VkPhysicalDeviceProperties::apiVersion
       + VkApplicationInfo::apiVersion
-
-###### Return Code 返回码
+###### State and State Query: Return Code 返回码
 + VkResult-Success Code
    + VK_NOT_READY：fence/query未完成
    + VK_THREAD_DONE_KHR：deferred operation未完成，但没有剩余线程工作
@@ -169,15 +168,31 @@ immutable(其他所有parameter)：不需外部sync，不可destroy，可能内�
 ###### Numeric Representation & Computation
 shader的range & precision 见[SPIR-V](https://www.khronos.org/registry/vulkan/specs/1.2-khr-extensions/html/vkspec.html#spirvenv-precision-operation)
 
-非shader的range & precision
-+ 浮点数
-   + magnitude >= $2^{32}$
+非shader的range & precision 见[data format](https://www.khronos.org/registry/vulkan/specs/1.2-khr-extensions/html/vkspec.html#data-format)
+https://www.khronos.org/registry/DataFormat/specs/1.3/dataformat.1.3.html
++ 数据格式
+   + 16b = 1 sign + 5 exponent + 10 mantissa
+   + u11b = 5 exponent + 6 mantissa
+   + u10b = 5 exponent + 5 mantissa
++ 浮点数range & precision不合法不导致崩溃
+   + 浮点数magnitude >= $2^{32}$
+   + unsign负数 $\Rightarrow$ 0
+   + 超过magnitude $\Rightarrow$ Inf或最大数
+###### Fixed-Point Int $\Leftrightarrow$ normalized Floating Point Conversion
+signed fixed-point integer: signed two's complement $\in[-2^{b-1}+1,2^{b-1}-1]$
+floating point : $f = max(\frac{c}{2^{b-1}-1}, -1.0) \in [-1,1]$
+注意$-2^{b-1}$在int中合法，在fp中会被clamp
 
-##### State and State Query
+
+##### Common Object Types
+###### Offsets
+buffer中的uint32 pixelPos
+###### Extents
+buffer中的uint32 长方形区域(width,height,depth)
+###### Rectangles = Offset + Extent
+###### StructureType
+见VkStructureType
 
 
-##### Objects 
 
-
-##### Shaders
 
