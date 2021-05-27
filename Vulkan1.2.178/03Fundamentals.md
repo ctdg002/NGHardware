@@ -90,7 +90,7 @@ RetrieveResult：vkGet/vkEnumerate
 ##### Queues
 ###### Threading Behavior
 默认多线程，传统mutex需要通过pthread library等第三方库构建
-被定义为externally synchronized的vkObject：需要线程安全的SimpleStoreUpdate-> app为所有相关CB设置内部memory barrier，确保CB不同时执行
+被定义为==externally synchronized==的vkObject：需要线程安全的SimpleStoreUpdate-> ==app为所有相关CB设置内部memory barrier，确保CB不同时执行==
    + 对线程的操作：Queue，Fence，Semaphore
    + 事件触发：Event
    + 特殊资源：CB本身，swapchain
