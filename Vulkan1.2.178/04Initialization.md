@@ -74,8 +74,8 @@ https://www.khronos.org/registry/vulkan/specs/1.2-khr-extensions/html/vkspec.htm
    + samples per pixel数
 ##### Logical Device 逻辑特性,state & resources
 + 创建logical device: 从一个==device group==(相同硬件属性)中选取subset physical devices==创建对应的logical device==
-   + vkDeviceCreateInfo.VkDeviceQueueCreateInfo
-      + protected-capable queue拥有唯一的queueFamilyINdex
+   + vkDeviceCreateInfo
+   + 同时创建Queue
 
 + Device Use
    + 创建Queue
@@ -97,7 +97,30 @@ https://www.khronos.org/registry/vulkan/specs/1.2-khr-extensions/html/vkspec.htm
    + vkDeviceWaitIdle -> vkDestroyDevice
 
 ##### Queue
-+ queue family: queue执行相同op
++ queue family: queue执行相同op，通常一个physical device应该只有一个queue family
+
+##### QueueFamily
++ vkDeviceCreateInfo.VkDeviceQueueCreateInfo
+   + protected-capable queue（QUEUE_CREATE_PROTECTED内存独立）拥有唯一的queueFamilyIndex，与QueueFamilyProperties对应
++ QueueFamilyIndex与CommandPool对应
++ Image/Buffer需要指定可访问的QueueFamilies
++ 不同QueueFamily访问Resource，需要MemoryBarrier
+
+##### Queue Priority（0.0~1.0）
+高优先级分配更多时间片，不保证但有可能优先分配，仅在同一Device中
+（Graphics > AsyncCompute）
+
+##### Queue Submission
++ vkQueueSubmit(TargetQueue物理线程, batches, completionFence) 提交==到==物理线程后CB返回
++ 每个batch可以：
+   + semaphore wait等待信号量开始执行
+   + queue operation线程工作包
+   + semaphore signal触发信号量（递减）
++ ==sparse memory binding绑定虚拟内存==
+   + pagetable更新 --> 必须锁pagetable --> 所有相关CB被阻塞
+
+
+
 
 
 
