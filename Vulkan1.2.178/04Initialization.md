@@ -73,6 +73,31 @@ https://www.khronos.org/registry/vulkan/specs/1.2-khr-extensions/html/vkspec.htm
    + semaphore最大差别
    + samples per pixel数
 ##### Logical Device 逻辑特性,state & resources
++ 创建logical device: 从一个==device group==(相同硬件属性)中选取subset physical devices==创建对应的logical device==
+   + vkDeviceCreateInfo.VkDeviceQueueCreateInfo
+      + protected-capable queue拥有唯一的queueFamilyINdex
+
++ Device Use
+   + 创建Queue
+   + 创建Synchronization Construct
+   + 管理内存
+   + 管理CB
+   + 管理graphics state
++ Lost Device: 
+   + 原因：timeout, 电源与内存不足，implementation error
+   + logical device lost时，不确保后续CB/device memory可靠，确保physical device可靠，可以再次创建logical device
+   + 驱动implementation error时，可能导致physical device lost，不可创建logical device，甚至很可能导致app/os崩溃
+   + host 仍需要==手动释放的内存(可达不可靠)==：
+      + objects & devices
+      + vkMapMemory绑定的host memory
+      + external memory
+   + async CB在 finite time 后返回VK_ERROR_DEVICE_LOST/VK_SUCCESS
+   + semaphore行为由驱动保证
++ 销毁Device
+   + vkDeviceWaitIdle -> vkDestroyDevice
+
+##### Queue
++ queue family: queue执行相同op
 
 
 
