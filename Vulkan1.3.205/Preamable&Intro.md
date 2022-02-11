@@ -24,3 +24,9 @@ can/cannot == 硬件是否支持
 ##### References
 API Reference:
 https://www.khronos.org/registry/vulkan/specs/1.2-khr-extensions/html/vkspec.html#${ApiName}
+
+
+
+#### TBD
++ QuerySample
+在一个Pass内部绑定两次Pipeline
